@@ -16,7 +16,7 @@ app.set('trust proxy', true)
 
 // Ruta base por defecto
 app.use('/', (req, res) => {
-  res.json({ message: 'API funcionando en /' })
+  res.json({ own: 'powered by @barrasadev' })
 })
 
 const PORT = process.env.PORT || 3005
