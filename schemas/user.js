@@ -18,5 +18,6 @@ module.exports = {
   createdOn: {
     type: Date,
     default: () => new Date()
-  }
+  },
+  isAdmin: { type: Boolean, default: false }
 }
