@@ -94,12 +94,65 @@ class user extends superClass {
     await this.update({ access })
   }
 
+  /* FUNCIONES STATICAS */
   static async isGhost(id){
     const result = await this.model.findOne({ _id: id })
     if (result.email) return false
     return true
   }
 
+  static async countUsers(days) {
+    const model = mongoose.models.User || mongoose.model('User', new mongoose.Schema({}, { strict: false }))
+
+    if (!days) {
+      return await model.countDocuments()
+    }
+
+    const sinceDate = new Date()
+    sinceDate.setDate(sinceDate.getDate() - days)
+
+    return await model.countDocuments({ createdOn: { $gte: sinceDate } })
+  }
+
+  static async avgVisitTimeLastMonth() {
+    const model = mongoose.models.User || mongoose.model('User', new mongoose.Schema({}, { strict: false }))
+
+    const sinceDate = new Date()
+    sinceDate.setDate(sinceDate.getDate() - 7)
+
+    const users = await model.find()
+
+    let totalTime = 0
+    let totalVisits = 0
+
+    users.forEach(user => {
+      const access = user.access || []
+
+      access.forEach(entry => {
+        const start = new Date(entry.start)
+        const end = new Date(entry.end)
+
+        // Contar solo sesiones que comenzaron o terminaron en los últimos 30 días
+        if (
+          (!isNaN(start) && start >= sinceDate) ||
+          (!isNaN(end) && end >= sinceDate)
+        ) {
+          const duration = end - start
+          if (!isNaN(duration) && duration > 0) {
+            totalTime += duration
+            totalVisits++
+          }
+        }
+      })
+    })
+
+    if (totalVisits === 0) return 0
+
+    const avgMs = totalTime / totalVisits
+    const avgSeconds = Math.round(avgMs / 1000)
+
+    return avgSeconds
+  }
 }
 
 module.exports = user
