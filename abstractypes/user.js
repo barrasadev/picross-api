@@ -87,7 +87,7 @@ class user extends superClass {
       const ipInfo = new IP()
       await ipInfo.findByIP(ip)
 
-      if (!ipInfo.get()) await ipInfo.createFromAPI(ip)
+      if (!ipInfo.get('_id')) await ipInfo.createFromAPI(ip)
     }
 
     // Guardar
