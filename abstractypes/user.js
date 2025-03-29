@@ -17,7 +17,6 @@ class user extends superClass {
     const result = await this.model.findOne({ _id: id })
     if (!result) return this.set(null)
     this.set(result.toObject())
-    console.log(this.get())
     return this.get()
   }
 
@@ -59,13 +58,12 @@ class user extends superClass {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
       return decoded.id
     } catch (err) {
-      console.error('❌ Error al verificar token:', err.message)
       return null
     }
   }
 
   async registerActivity(ip) {
-    if (!ip) return false
+    if (!ip || ip === '0.0.0.0') return false
 
     const now = new Date()
     const access = this.get('access') || []

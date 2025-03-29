@@ -9,6 +9,8 @@ connectDB()
 
 // ⬇️ Asegúrate de tener esta línea:
 app.use('/users', require('./routes/users'))
+app.set('trust proxy', true)
+
 
 // Ruta base por defecto
 app.use('/', (req, res) => {

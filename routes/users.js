@@ -46,7 +46,7 @@ router.get('/live', async (req, res) => {
     return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
   }
 
-  const ip = req.ip || req.connection.remoteAddress || '0.0.0.0'
+  const ip = req.ip || '0.0.0.0'
   await user.registerActivity(ip)
 
   return res.json({ success: true })
