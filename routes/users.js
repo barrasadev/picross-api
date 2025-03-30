@@ -85,6 +85,13 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Faltan campos' })
   }
 
+  const UserModel = new User().model
+  const existingUser = await UserModel.findOne({ email })
+
+  if (existingUser) {
+    return res.status(409).json({ success: false, message: 'emailEnUso' })
+  }
+
   const authHeader = req.headers.authorization
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -92,7 +99,6 @@ router.post('/register', async (req, res) => {
     const userId = User.getIdByToken(token)
 
     if (userId && await User.isGhost(userId)) {
-      // Es un usuario ghost, lo actualizamos
       const user = new User()
       await user.findById(userId)
       await user.update({ email, password })
@@ -104,7 +110,7 @@ router.post('/register', async (req, res) => {
     }
   }
 
-  // Si no hay token o no es ghost, crear uno nuevo
+  // Si no hay token válido o no es ghost, crear usuario nuevo
   const user = new User()
   await user.create({ email, password })
 
