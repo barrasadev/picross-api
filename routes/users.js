@@ -3,6 +3,19 @@ const express = require('express')
 const router = express.Router()
 const User = require('../abstractypes/user')
 
+
+// POST /users/create
+router.post('/create', async (req, res) => {
+  const user = new User()
+  await user.create()
+
+  return res.status(201).json({
+    success: true,
+    token: user.getToken()
+  })
+})
+
+
 // POST /users/register
 router.post('/register', async (req, res) => {
   const { email, password } = req.body
