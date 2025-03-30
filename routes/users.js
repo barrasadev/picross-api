@@ -164,5 +164,33 @@ router.post('/changeDetails', async (req, res) => {
   return res.json({ success: true })
 })
 
+router.post('/changePassword', async (req, res) => {
+  const { oldPassword, password } = req.body
+
+  if (!oldPassword || !password) return res.status(400).json({ success: false, message: 'Faltan campos'})
+
+  const authHeader = req.headers.authorization
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(400).json({ success: false, message: 'Token Bearer requerido' })
+  }
+
+  const token = authHeader.split(' ')[1]
+  const userId = User.getIdByToken(token)
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
+  }
+
+  const user = new User()
+  await user.findById(userId)
+  if (!user.get('_id')) {
+    return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
+  }
+
+  if (oldPassword === user.get('password')) {
+    await user.update({password})
+    return res.json({ success: true })
+  } else return res.json(404)({ success: false, message: 'Password incorrect' })
+})
+
 
 module.exports = router
