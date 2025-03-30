@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../abstractypes/user')
+const { image } = require('../schemas/user')
 
 
 // POST /users/create
@@ -100,6 +101,27 @@ router.get('/live', async (req, res) => {
   }
 
   return res.json({ success: true })
+})
+
+// GET /users/accountDetails
+router.get('/accountDetails', async (req, res) => {
+  const authHeader = req.headers.authorization
+  if (!authHeader?.startsWith('Bearer ')) return res.status(400).json({ success: false, message: 'Token Bearer requerido' })
+
+  const token = authHeader.split(' ')[1]
+  const userId = User.getIdByToken(token)
+  if (!userId) return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
+
+  const user = new User()
+  await user.findById(userId)
+  if (!user.get('_id')) return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
+
+  const datos = {
+    image: user.get('image'),
+    username: user.get('username'),
+    email: user.get('email') || 'noemail@playpicross.com'
+  }
+  return res.json({ success: true, datos })
 })
 
 module.exports = router
