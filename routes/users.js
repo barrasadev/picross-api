@@ -189,7 +189,7 @@ router.post('/changePassword', async (req, res) => {
   if (oldPassword === user.get('password')) {
     await user.update({password})
     return res.json({ success: true })
-  } else return res.json(404).json({ success: false, message: 'Password incorrect' })
+  } else return res.status(404).json({ success: false, message: 'Password incorrect' })
 })
 
 
