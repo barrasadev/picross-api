@@ -129,22 +129,30 @@ router.post('/changeDetails', async (req, res) => {
   const { profilePicture, name, email } = req.body
 
   const authHeader = req.headers.authorization
-  if (!authHeader?.startsWith('Bearer ')) return res.status(400).json({ success: false, message: 'Token Bearer requerido' })
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(400).json({ success: false, message: 'Token Bearer requerido' })
+  }
 
   const token = authHeader.split(' ')[1]
   const userId = User.getIdByToken(token)
-  if (!userId) return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
+  }
 
   const user = new User()
   await user.findById(userId)
-  if (!user.get('_id')) return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
+  if (!user.get('_id')) {
+    return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
+  }
 
   const datos = {}
 
-  if (email){
+  if (email) {
     const UserModel = new User().model
     const existingUser = await UserModel.findOne({ email })
-    if (existingUser) return res.status(409).json({ success: false, message: 'emailEnUso' })
+    if (existingUser && existingUser._id.toString() !== userId) {
+      return res.status(409).json({ success: false, message: 'emailEnUso' })
+    }
     datos.email = email
   }
 
@@ -152,7 +160,9 @@ router.post('/changeDetails', async (req, res) => {
   if (profilePicture) datos.image = profilePicture
 
   await user.update(datos)
+
   return res.json({ success: true })
 })
+
 
 module.exports = router
