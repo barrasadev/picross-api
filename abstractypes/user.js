@@ -119,11 +119,13 @@ class user extends superClass {
   }
 
   /* FUNCIONES STATICAS */
-  static async isGhost(id){
-    const result = await this.model.findOne({ _id: id })
+  static async isGhost(id) {
+    const tempUser = new this() // o: new User()
+    const result = await tempUser.model.findOne({ _id: id })
     if (!result || result?.email) return false
     return true
   }
+
 }
 
 module.exports = user
