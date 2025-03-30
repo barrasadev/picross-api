@@ -6,6 +6,7 @@ module.exports = {
     type: String,
     default: 'https://playpicross.com/img/picross.ico'
   },
+  avgTime: { type: Number },
   access: {
     type: Array,
     default: [],
