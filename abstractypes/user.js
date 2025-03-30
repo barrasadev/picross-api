@@ -94,10 +94,35 @@ class user extends superClass {
     await this.update({ access })
   }
 
+  async loginUser(email, password){
+    const result = await this.model.findOne({ email, password })
+    if (result?._id) return result._id
+    else return null
+  }
+
+  async migrateFrom(id) {
+    if (!id) return false
+
+    const oldUser = await this.model.findOne({ _id: id })
+    if (!oldUser) return false
+
+    const currentAccess = this.get('access') || []
+    const oldAccess = oldUser.access || []
+
+    // Mezclar accesos
+    const mergedAccess = [...currentAccess, ...oldAccess]
+
+    // Actualizar el usuario actual
+    await this.update({ access: mergedAccess })
+
+    // Eliminar el usuario antiguo
+    await this.model.deleteOne({ _id: id })
+  }
+
   /* FUNCIONES STATICAS */
   static async isGhost(id){
     const result = await this.model.findOne({ _id: id })
-    if (result.email) return false
+    if (!result || result?.email) return false
     return true
   }
 
