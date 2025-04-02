@@ -35,20 +35,27 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
 router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const pageSize = 10
-
-  console.log(`📄 Página solicitada: ${page}`)
+  const { username, email } = req.query
 
   const UserModel = new User().model
-  const allUsers = await UserModel.find().sort({ 'access.end': -1 })
 
-  console.log(`👥 Total de usuarios encontrados: ${allUsers.length}`)
+  // Construir el query de búsqueda
+  const searchQuery = {}
+  if (username) {
+    searchQuery.username = { $regex: username, $options: 'i' }
+  }
+  if (email) {
+    searchQuery.email = { $regex: email, $options: 'i' }
+  }
+
+  const allUsers = await UserModel.find(searchQuery).sort({ 'access.end': -1 })
 
   const paginatedUsers = allUsers.slice((page - 1) * pageSize, page * pageSize)
 
   const results = []
 
   for (const userData of paginatedUsers) {
-    const { username, image, email, access = [], avgTime = 0 } = userData
+    const { _id, username, image, email, access = [], avgTime = 0 } = userData
 
     let isOnline = false
     let country = null
@@ -73,6 +80,7 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
     }
 
     const userResult = {
+      id: _id,
       username,
       image,
       isOnline,
@@ -81,7 +89,6 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
       isRegistered: !!email,
       lastActivity
     }
-
 
     results.push(userResult)
   }
