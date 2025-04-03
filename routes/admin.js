@@ -124,6 +124,7 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
     let isOnline = false
     let country = null
     let countryFlag = null
+    let visitsLast7Days = 0
 
     if (user.access && user.access.length > 0) {
       const lastAccess = user.access[user.access.length - 1]
@@ -140,6 +141,10 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
         country = ipModel.get('country') || null
         countryFlag = ipModel.get('countryFlag') || null
       }
+
+      // Calculate visits in last 7 days
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      visitsLast7Days = user.access.filter(access => new Date(access.end) > sevenDaysAgo).length
     }
 
     const userData = {
@@ -147,6 +152,7 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
       correo: user.email,
       imagen: user.image,
       cantidadAccesos: user.access ? user.access.length : 0,
+      accesosUltimos7Dias: visitsLast7Days,
       fechaCreacion: user.createdOn,
       avgTime: user.avgTime || 0,
       isOnline,
