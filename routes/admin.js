@@ -99,5 +99,70 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
   return res.json({ success: true, users: results })
 })
 
+router.post('/datosUsuario', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.body
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere el ID del usuario'
+      })
+    }
+
+    const UserModel = new User().model
+    const user = await UserModel.findById(id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      })
+    }
+
+    let isOnline = false
+    let country = null
+    let countryFlag = null
+
+    if (user.access && user.access.length > 0) {
+      const lastAccess = user.access[user.access.length - 1]
+      const now = new Date()
+      const endDate = new Date(lastAccess.end)
+      const thirtySecondsAgo = new Date(now.getTime() - 120 * 1000)
+      isOnline = thirtySecondsAgo < endDate
+
+      // Get country info from first access
+      const firstAccess = user.access[0]
+      if (firstAccess && firstAccess.ip) {
+        const ipModel = new IP()
+        await ipModel.findByIP(firstAccess.ip)
+        country = ipModel.get('country') || null
+        countryFlag = ipModel.get('countryFlag') || null
+      }
+    }
+
+    const userData = {
+      usuario: user.username,
+      correo: user.email,
+      imagen: user.image,
+      cantidadAccesos: user.access ? user.access.length : 0,
+      fechaCreacion: user.createdOn,
+      avgTime: user.avgTime || 0,
+      isOnline,
+      paisCreacion: country,
+      banderaPais: countryFlag
+    }
+
+    res.json({
+      success: true,
+      data: userData
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    })
+  }
+})
 
 module.exports = router
