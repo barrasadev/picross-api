@@ -55,7 +55,7 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
   const results = []
 
   for (const userData of paginatedUsers) {
-    const { _id, username, image, email, access = [], avgTime = 0 } = userData
+    const { _id, username, image, email, access = [], avgTime = 0, isAdmin = false } = userData
 
     let isOnline = false
     let country = null
@@ -90,7 +90,8 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
       countryFlag,
       avgTime,
       isRegistered: !!email,
-      lastActivity
+      lastActivity,
+      isAdmin
     }
 
     results.push(userResult)
@@ -150,7 +151,8 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
       avgTime: user.avgTime || 0,
       isOnline,
       paisCreacion: country,
-      banderaPais: countryFlag
+      banderaPais: countryFlag,
+      isAdmin: user.isAdmin || false
     }
 
     res.json({
