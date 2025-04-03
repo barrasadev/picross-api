@@ -59,6 +59,7 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
 
     let isOnline = false
     let country = null
+    let countryFlag = null
     let lastActivity = null
 
     if (access.length > 0) {
@@ -76,6 +77,7 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
         const ipModel = new IP()
         await ipModel.findByIP(ip)
         country = ipModel.get('country') || null
+        countryFlag = ipModel.get('countryFlag') || null
       }
     }
 
@@ -85,6 +87,7 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
       image,
       isOnline,
       country,
+      countryFlag,
       avgTime,
       isRegistered: !!email,
       lastActivity
