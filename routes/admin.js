@@ -61,12 +61,10 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
     let country = null
     let countryFlag = null
     let lastActivity = null
-    let userAgent = null
 
     if (access.length > 0) {
       const last = access[access.length - 1]
       lastActivity = last.end
-      userAgent = access[0].userAgent || null
 
       const now = new Date()
       const endDate = new Date(last.end)
@@ -93,8 +91,7 @@ router.get('/listadoUsuarios', requireAdmin, async (req, res) => {
       avgTime,
       isRegistered: !!email,
       lastActivity,
-      isAdmin,
-      userAgent
+      isAdmin
     }
 
     results.push(userResult)
@@ -161,7 +158,8 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
       isOnline,
       paisCreacion: country,
       banderaPais: countryFlag,
-      isAdmin: user.isAdmin || false
+      isAdmin: user.isAdmin || false,
+      userAgent: user.access && user.access.length > 0 ? user.access[0].userAgent || null : null
     }
 
     res.json({
