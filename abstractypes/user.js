@@ -62,7 +62,7 @@ class user extends superClass {
     }
   }
 
-  async registerActivity(ip) {
+  async registerActivity(ip, userAgent) {
     if (!ip || ip === '0.0.0.0') return false
 
     const now = new Date()
@@ -79,6 +79,7 @@ class user extends superClass {
       // Nueva actividad
       access.push({
         ip,
+        userAgent,
         start: now,
         end: new Date(now.getTime() + 30 * 1000)
       })

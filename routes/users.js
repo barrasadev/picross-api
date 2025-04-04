@@ -79,7 +79,8 @@ router.get('/live', async (req, res) => {
   if (!user.get('_id')) return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
 
   const ip = req.ip || '0.0.0.0'
-  await user.registerActivity(ip)
+  const userAgent = req.headers['user-agent'] || 'Unknown'
+  await user.registerActivity(ip, userAgent)
 
   const access = user.get('access') || []
   const lastSession = access[access.length - 1]

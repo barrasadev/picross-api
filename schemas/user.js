@@ -12,6 +12,7 @@ module.exports = {
     default: [],
     schema: {
       ip: { type: String, required: true },
+      userAgent: { type: String },
       start: { type: Date, required: true, default: () => new Date() },
       end: { type: Date }
     }
