@@ -213,6 +213,7 @@ router.post('/loginsUsuario', requireAdmin, async (req, res) => {
 
         accesos.push({
           ip: access.ip,
+          userAgent: access.userAgent || 'Unknown',
           fechaEntrada: access.start,
           fechaSalida: access.end,
           tiempoVisita: visitTimeSeconds
