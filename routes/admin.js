@@ -206,16 +206,16 @@ router.post('/loginsUsuario', requireAdmin, async (req, res) => {
 
     if (user.access && user.access.length > 0) {
       for (const access of user.access) {
-        // Calcular tiempo de visita en minutos
+        // Calcular tiempo de visita en segundos
         const startTime = new Date(access.start)
         const endTime = new Date(access.end)
-        const visitTimeMinutes = Math.round((endTime - startTime) / (1000 * 60))
+        const visitTimeSeconds = Math.round((endTime - startTime) / 1000)
 
         accesos.push({
           ip: access.ip,
           fechaEntrada: access.start,
           fechaSalida: access.end,
-          tiempoVisita: visitTimeMinutes
+          tiempoVisita: visitTimeSeconds
         })
 
         // Solo procesamos la IP si no la hemos visto antes
