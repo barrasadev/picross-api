@@ -173,4 +173,77 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
   }
 })
 
+router.post('/loginsUsuario', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.body
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere el ID del usuario'
+      })
+    }
+
+    const UserModel = new User().model
+    const user = await UserModel.findById(id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      })
+    }
+
+    if (user.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Los administradores son intocables'
+      })
+    }
+
+    const accesos = []
+    const ipData = new Map() // Usamos Map para evitar IPs duplicadas
+
+    if (user.access && user.access.length > 0) {
+      for (const access of user.access) {
+        // Calcular tiempo de visita en minutos
+        const startTime = new Date(access.start)
+        const endTime = new Date(access.end)
+        const visitTimeMinutes = Math.round((endTime - startTime) / (1000 * 60))
+
+        accesos.push({
+          ip: access.ip,
+          fechaEntrada: access.start,
+          fechaSalida: access.end,
+          tiempoVisita: visitTimeMinutes
+        })
+
+        // Solo procesamos la IP si no la hemos visto antes
+        if (access.ip && !ipData.has(access.ip)) {
+          const ipModel = new IP()
+          await ipModel.findByIP(access.ip)
+          ipData.set(access.ip, {
+            ip: access.ip,
+            country: ipModel.get('country') || null,
+            countryFlag: ipModel.get('countryFlag') || null,
+            city: ipModel.get('city') || null,
+            region: ipModel.get('region') || null
+          })
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      accesos: accesos,
+      datosIPs: Array.from(ipData.values())
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    })
+  }
+})
+
 module.exports = router
