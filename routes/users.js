@@ -7,9 +7,9 @@ const { image } = require('../schemas/user')
 
 // POST /users/create
 router.post('/create', async (req, res) => {
-  const { referrer } = req.body
+  const { ref } = req.body
   const user = new User()
-  await user.create({ referrer })
+  await user.create({ ref })
 
   return res.status(201).json({
     success: true,
@@ -20,7 +20,7 @@ router.post('/create', async (req, res) => {
 
 // POST /users/register
 router.post('/register', async (req, res) => {
-  const { email, password, referrer } = req.body
+  const { email, password, ref } = req.body
   if (!email || !password) return res.status(400).json({ success: false, message: 'Faltan campos' })
 
   const UserModel = new User().model
@@ -35,13 +35,13 @@ router.post('/register', async (req, res) => {
     if (userId && await User.isGhost(userId)) {
       const user = new User()
       await user.findById(userId)
-      await user.update({ email, password, referrer })
+      await user.update({ email, password, ref })
       return res.status(200).json({ success: true, token: user.getToken() })
     }
   }
 
   const user = new User()
-  await user.create({ email, password, referrer })
+  await user.create({ email, password, ref })
   return res.status(201).json({ success: true, token: user.getToken() })
 })
 
