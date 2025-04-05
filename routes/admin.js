@@ -159,7 +159,8 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
       paisCreacion: country,
       banderaPais: countryFlag,
       isAdmin: user.isAdmin || false,
-      userAgent: user.access && user.access.length > 0 ? user.access[0].userAgent || null : null
+      userAgent: user.access && user.access.length > 0 ? user.access[0].userAgent || null : null,
+      referrer: user.referrer || 'organic'
     }
 
     res.json({
