@@ -20,7 +20,7 @@ class user extends superClass {
     return this.get()
   }
 
-  async create({ username, email, password } = {}) {
+  async create({ username, email, password, referrer } = {}) {
     if (!username) {
       const random = Math.floor(1000 + Math.random() * 9000)
       username = `PicrossUser${random}`
@@ -29,6 +29,7 @@ class user extends superClass {
     const userData = { username }
     if (email) userData.email = email
     if (password) userData.password = password
+    if (referrer) userData.referrer = referrer
 
     for (const key in this.schema) {
       const def = this.schema[key].default

@@ -21,5 +21,6 @@ module.exports = {
     type: Date,
     default: () => new Date()
   },
-  isAdmin: { type: Boolean, default: false }
+  isAdmin: { type: Boolean, default: false },
+  referrer: { type: String }
 }
