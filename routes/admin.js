@@ -249,4 +249,52 @@ router.post('/loginsUsuario', requireAdmin, async (req, res) => {
   }
 })
 
+router.get('/dashboardMap', requireAdmin, async (req, res) => {
+  try {
+    const UserModel = new User().model
+    const IPModel = new IP().model
+
+    // Get all users with their first access IP
+    const users = await UserModel.find({ 'access.0.ip': { $exists: true } })
+
+    // Create a map to store country counts
+    const countryMap = new Map()
+
+    // Process each user
+    for (const user of users) {
+      if (user.access && user.access.length > 0) {
+        const firstAccess = user.access[0]
+        if (firstAccess.ip) {
+          const ipInfo = await IPModel.findOne({ ip: firstAccess.ip })
+          if (ipInfo && ipInfo.country) {
+            const country = ipInfo.country
+            const currentCount = countryMap.get(country) || 0
+            countryMap.set(country, currentCount + 1)
+          }
+        }
+      }
+    }
+
+    // Convert map to the required format
+    const result = {}
+    for (const [country, count] of countryMap) {
+      result[country] = {
+        users: count,
+        name: country
+      }
+    }
+
+    res.json({
+      success: true,
+      data: result
+    })
+  } catch (err) {
+    console.error('Error in dashboardMap:', err)
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    })
+  }
+})
+
 module.exports = router
