@@ -297,4 +297,62 @@ router.get('/dashboardMap', requireAdmin, async (req, res) => {
   }
 })
 
+router.get('/dashboardUsersVisits', requireAdmin, async (req, res) => {
+  try {
+    const UserModel = new User().model
+    const IPModel = new IP().model
+
+    // Get all users with their access information
+    const users = await UserModel.find({ 'access': { $exists: true, $ne: [] } })
+
+    const results = []
+
+    // Process each user
+    for (const user of users) {
+      if (user.access && user.access.length > 0) {
+        const firstAccess = user.access[0]
+        let country = null
+        let device = 'Unknown'
+
+        // Get country from first access IP
+        if (firstAccess.ip) {
+          const ipInfo = await IPModel.findOne({ ip: firstAccess.ip })
+          if (ipInfo) {
+            country = ipInfo.country
+          }
+        }
+
+        // Get device from user agent
+        if (firstAccess.userAgent) {
+          device = firstAccess.userAgent
+        }
+
+        results.push({
+          username: user.username,
+          totalVisits: user.access.length,
+          country: country,
+          profilePicture: user.image,
+          device: device
+        })
+      }
+    }
+
+    // Sort by totalVisits in descending order and get top 20
+    const sortedResults = results
+      .sort((a, b) => b.totalVisits - a.totalVisits)
+      .slice(0, 20)
+
+    res.json({
+      success: true,
+      data: sortedResults
+    })
+  } catch (err) {
+    console.error('Error in dashboardUsersVisits:', err)
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    })
+  }
+})
+
 module.exports = router
