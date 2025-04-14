@@ -332,7 +332,8 @@ router.get('/dashboardUsersVisits', requireAdmin, async (req, res) => {
           totalVisits: user.access.length,
           country: country,
           profilePicture: user.image,
-          device: device
+          device: device,
+          isAdmin: user.isAdmin
         })
       }
     }
