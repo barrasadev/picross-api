@@ -361,6 +361,8 @@ router.post('/editUser', requireAdmin, async (req, res) => {
     const { id } = req.query
     const updates = req.body
 
+    console.log('Received update request:', { id, updates })
+
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -377,6 +379,8 @@ router.post('/editUser', requireAdmin, async (req, res) => {
 
     const user = new User()
     await user.findById(id)
+
+    console.log('Found user:', user.get())
 
     if (!user.get('_id')) {
       return res.status(404).json({
@@ -402,12 +406,16 @@ router.post('/editUser', requireAdmin, async (req, res) => {
       }
     }
 
+    console.log('Update data:', updateData)
+
     // Actualizar el usuario
-    await user.update(updateData)
+    const result = await user.update(updateData)
+    console.log('Update result:', result)
 
     res.json({
       success: true,
-      message: 'Usuario actualizado correctamente'
+      message: 'Usuario actualizado correctamente',
+      data: result
     })
   } catch (err) {
     console.error('Error in editUser:', err)
