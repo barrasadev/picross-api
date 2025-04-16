@@ -375,17 +375,17 @@ router.post('/editUser', requireAdmin, async (req, res) => {
       })
     }
 
-    const UserModel = new User().model
-    const user = await UserModel.findById(id)
+    const user = new User()
+    await user.findById(id)
 
-    if (!user) {
+    if (!user.get('_id')) {
       return res.status(404).json({
         success: false,
         message: 'Usuario no encontrado'
       })
     }
 
-    if (user.isAdmin) {
+    if (user.get('isAdmin')) {
       return res.status(403).json({
         success: false,
         message: 'Los administradores son intocables'
@@ -403,7 +403,7 @@ router.post('/editUser', requireAdmin, async (req, res) => {
     }
 
     // Actualizar el usuario
-    await UserModel.findByIdAndUpdate(id, updateData)
+    await user.update(updateData)
 
     res.json({
       success: true,
