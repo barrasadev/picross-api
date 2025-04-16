@@ -5,6 +5,7 @@ const requireAdmin = require('../middlewares/requireAdmin')
 const Admin = require('../abstractypes/admin')
 const User = require('../abstractypes/user')
 const IP = require('../abstractypes/ip')
+const bcrypt = require('bcrypt')
 
 // Ruta protegida solo para admin
 router.get('/', requireAdmin, (req, res) => {
@@ -349,6 +350,68 @@ router.get('/dashboardUsersVisits', requireAdmin, async (req, res) => {
     })
   } catch (err) {
     console.error('Error in dashboardUsersVisits:', err)
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    })
+  }
+})
+
+router.post('/editUser', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.query
+    const updates = req.body
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere el ID del usuario'
+      })
+    }
+
+    if (!updates || Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requieren campos para actualizar'
+      })
+    }
+
+    const UserModel = new User().model
+    const user = await UserModel.findById(id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      })
+    }
+
+    if (user.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Los administradores son intocables'
+      })
+    }
+
+    // Actualizar los campos permitidos
+    const allowedFields = ['username', 'email', 'password', 'referrer']
+    const updateData = {}
+
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        updateData[field] = updates[field]
+      }
+    }
+
+    // Actualizar el usuario
+    await UserModel.findByIdAndUpdate(id, updateData)
+
+    res.json({
+      success: true,
+      message: 'Usuario actualizado correctamente'
+    })
+  } catch (err) {
+    console.error('Error in editUser:', err)
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
