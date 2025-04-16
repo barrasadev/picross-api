@@ -361,8 +361,6 @@ router.post('/editUser', requireAdmin, async (req, res) => {
     const { id } = req.query
     const updates = req.body
 
-    console.log('Received update request:', { id, updates })
-
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -380,8 +378,6 @@ router.post('/editUser', requireAdmin, async (req, res) => {
     const user = new User()
     await user.findById(id)
 
-    console.log('Found user:', user.get())
-
     if (!user.get('_id')) {
       return res.status(404).json({
         success: false,
@@ -397,20 +393,20 @@ router.post('/editUser', requireAdmin, async (req, res) => {
     }
 
     // Actualizar los campos permitidos
-    const allowedFields = ['username', 'email', 'password', 'referrer']
+    const allowedFields = ['usuario', 'email', 'password', 'referer']
     const updateData = {}
 
     for (const field of allowedFields) {
       if (updates[field] !== undefined) {
-        updateData[field] = updates[field]
+        // Mapear los nombres de los campos
+        const dbField = field === 'usuario' ? 'username' :
+                       field === 'referer' ? 'referrer' : field
+        updateData[dbField] = updates[field]
       }
     }
 
-    console.log('Update data:', updateData)
-
     // Actualizar el usuario
     const result = await user.update(updateData)
-    console.log('Update result:', result)
 
     res.json({
       success: true,
