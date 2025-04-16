@@ -5,7 +5,6 @@ const requireAdmin = require('../middlewares/requireAdmin')
 const Admin = require('../abstractypes/admin')
 const User = require('../abstractypes/user')
 const IP = require('../abstractypes/ip')
-const bcrypt = require('bcrypt')
 
 // Ruta protegida solo para admin
 router.get('/', requireAdmin, (req, res) => {
