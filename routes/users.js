@@ -196,15 +196,20 @@ router.post('/changePassword', async (req, res) => {
 
 // POST /users/score
 router.post('/score', async (req, res) => {
-  const { token, seed, completionTime, errorsCount, width, height, points } = req.body
+  const { seed, completionTime, errorsCount, width, height, points } = req.body
 
-  if (!token) return res.status(400).json({ success: false, message: 'Token requerido' })
+  const authHeader = req.headers.authorization
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(400).json({ success: false, message: 'Token Bearer requerido' })
+  }
+
+  const token = authHeader.split(' ')[1]
+  const userId = User.getIdByToken(token)
+  if (!userId) return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
+
   if (!seed || !completionTime || errorsCount === undefined || !width || !height || points === undefined) {
     return res.status(400).json({ success: false, message: 'Faltan campos requeridos' })
   }
-
-  const userId = User.getIdByToken(token)
-  if (!userId) return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
 
   const user = new User()
   await user.findById(userId)
