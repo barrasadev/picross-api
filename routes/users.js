@@ -194,5 +194,35 @@ router.post('/changePassword', async (req, res) => {
   } else return res.status(404).json({ success: false, message: 'Password incorrect' })
 })
 
+// POST /users/score
+router.post('/score', async (req, res) => {
+  const { token, seed, completionTime, errorsCount, width, height, points } = req.body
+
+  if (!token) return res.status(400).json({ success: false, message: 'Token requerido' })
+  if (!seed || !completionTime || errorsCount === undefined || !width || !height || points === undefined) {
+    return res.status(400).json({ success: false, message: 'Faltan campos requeridos' })
+  }
+
+  const userId = User.getIdByToken(token)
+  if (!userId) return res.status(401).json({ success: false, message: 'Token inválido o expirado' })
+
+  const user = new User()
+  await user.findById(userId)
+  if (!user.get('_id')) return res.status(404).json({ success: false, message: 'Usuario no encontrado' })
+
+  const puzzles = user.get('puzzles') || []
+  puzzles.push({
+    seed,
+    completionTime,
+    errorsCount,
+    width,
+    height,
+    points,
+    dateCompleted: new Date()
+  })
+
+  await user.update({ puzzles })
+  return res.json({ success: true })
+})
 
 module.exports = router

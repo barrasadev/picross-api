@@ -17,6 +17,19 @@ module.exports = {
       end: { type: Date }
     }
   },
+  puzzles: {
+    type: Array,
+    default: [],
+    schema: {
+      seed: { type: String, required: true },
+      completionTime: { type: String, required: true },
+      errorsCount: { type: Number, required: true },
+      width: { type: Number, required: true },
+      height: { type: Number, required: true },
+      points: { type: Number, required: true },
+      dateCompleted: { type: Date, default: () => new Date() }
+    }
+  },
   createdOn: {
     type: Date,
     default: () => new Date()
