@@ -161,7 +161,16 @@ router.post('/datosUsuario', requireAdmin, async (req, res) => {
       banderaPais: countryFlag,
       isAdmin: user.isAdmin || false,
       userAgent: user.access && user.access.length > 0 ? user.access[0].userAgent || null : null,
-      referrer: user.referrer || 'organic'
+      referrer: user.referrer || 'organic',
+      puzzles: user.puzzles ? user.puzzles.map(puzzle => ({
+        seed: puzzle.seed,
+        completionTime: puzzle.completionTime,
+        errorsCount: puzzle.errorsCount,
+        width: puzzle.width,
+        height: puzzle.height,
+        points: puzzle.points,
+        dateCompleted: puzzle.dateCompleted
+      })) : []
     }
 
     res.json({
