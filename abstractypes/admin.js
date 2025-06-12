@@ -29,6 +29,20 @@ class Admin {
 
     return avgSeconds
   }
+
+  async getCountAllPuzzles() {
+    try {
+      const result = await this.model.aggregate([
+        { $unwind: { path: '$puzzles', preserveNullAndEmptyArrays: true } },
+        { $group: { _id: null, total: { $sum: 1 } } }
+      ])
+
+      return result.length > 0 ? result[0].total : 0
+    } catch (err) {
+      console.error('❌ Error al contar puzzles:', err.message)
+      return 0
+    }
+  }
 }
 
 module.exports = Admin
