@@ -5,7 +5,7 @@ const requireAdmin = require('../middlewares/requireAdmin')
 const Admin = require('../abstractypes/admin')
 const User = require('../abstractypes/user')
 const IP = require('../abstractypes/ip')
-
+const puzzles = require('../abstractypes/puzzles')
 // Ruta protegida solo para admin
 router.get('/', requireAdmin, (req, res) => {
   res.json({
@@ -20,12 +20,14 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
     const totalUsers = await adminUser.countUsers()
     const recentUsers = await adminUser.countUsers(7)
     const avgVisitTime = await adminUser.avgVisitTimeLastMonth()
+    const countAllPuzzles = await puzzles.countAllPuzzles()
 
     res.json({
       success: true,
       totalUsers,
       recentUsers,
-      avgVisitTime
+      avgVisitTime,
+      countAllPuzzles
     })
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error interno del servidor' })
